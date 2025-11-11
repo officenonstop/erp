@@ -1,5 +1,5 @@
 set -x
-snap install docker --channel=28.1.1+1/stable
+snap install docker
 
 echo "Waiting for 10 sec for docker service to come up ..."
 sleep 10
