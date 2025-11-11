@@ -78,11 +78,14 @@ services:
         done;
         echo "sites/common_site_config.json found";
         bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=admin --install-app erpnext --set-default frontend;
-        bench --site frontend install-app india_compliance;
-        bench --site frontend install-app hrms;
-        bench --site frontend install-app payments;
-        bench --site frontend install-app insights;
-        bench --site frontend install-app netmanthan_themes;
+        for app in india_compliance hrms payments insights netmanthan_themes; do
+          if ! bench --site frontend list-apps | grep -q "$app"; then
+            echo "Installing $app..."
+            bench --site frontend install-app "$app" || exit 1
+          else
+            echo "$app already installed, skipping."
+          fi
+        done;
 
   db:
     image: mariadb:10.7
