@@ -13,5 +13,5 @@ docker buildx build \
   --build-arg "PYTHON_VERSION=3.11.6" \
   --build-arg "NODE_VERSION=20.19.2" \
   --build-arg "APPS_JSON_BASE64=$APPS_JSON_BASE64" \
-  --tag erpnext_generic:v15.0 \
+  --tag erp:generic_v15.0 \
   --file images/custom/Containerfile .
