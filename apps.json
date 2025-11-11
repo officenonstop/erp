@@ -1,0 +1,26 @@
+[
+  {
+    "url": "https://github.com/frappe/erpnext",
+    "branch": "v15.80.1"
+  },
+  {
+    "url": "https://github.com/resilient-tech/india-compliance",
+    "branch": "v15.22.1"
+  },
+  {
+    "url": "https://github.com/frappe/hrms",
+    "branch": "v15.50.1"
+  },
+  {
+    "url": "https://github.com/frappe/payments",
+    "branch": "version-15"
+  },
+  {
+    "url": "https://github.com/frappe/insights.git",
+    "branch": "v3.2.12"
+  },
+  {
+    "url": "https://github.com/netmanthan/netmanthan_themes",
+    "branch": "main"
+  }
+] 
