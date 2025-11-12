@@ -2,7 +2,7 @@ version: "3"
 
 services:
   backend:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -18,7 +18,7 @@ services:
       MARIADB_ROOT_PASSWORD: admin
 
   configurator:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -47,7 +47,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   create-site:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -107,7 +107,7 @@ services:
       - db-data:/var/lib/mysql
 
   frontend:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     depends_on:
@@ -133,7 +133,7 @@ services:
       - "8080:8080"
 
   queue-long:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -149,7 +149,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   queue-short:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -183,7 +183,7 @@ services:
         condition: on-failure
 
   scheduler:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -197,7 +197,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   websocket:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
