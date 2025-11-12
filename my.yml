@@ -135,10 +135,9 @@ services:
     networks:
       - frappe_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=admin"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: mysqladmin ping -h localhost --password=admin
+      interval: 1s
+      retries: 20
     deploy:
       restart_policy:
         condition: on-failure
@@ -158,6 +157,7 @@ services:
     networks:
       - frappe_network
     depends_on:
+      - websocket
       backend:
         condition: service_healthy
       websocket:
