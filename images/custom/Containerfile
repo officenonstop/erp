@@ -128,7 +128,7 @@ RUN export APP_INSTALL_ARGS="" && \
     --verbose \
     /home/frappe/frappe-bench && \
   echo "🔍 Checking cloned apps..." && \
-    ls -1 /home/frappe/frappe-bench/apps || { echo "❌ No apps found in bench!"; exit 1; } \
+  ls -l /home/frappe/frappe-bench/apps || { echo "❌ No apps found in bench!"; exit 1; } && \
   cd /home/frappe/frappe-bench && \
   echo "{}" > sites/common_site_config.json && \
   find apps -mindepth 1 -path "*/.git" | xargs rm -fr
