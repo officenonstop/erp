@@ -3,6 +3,11 @@ version: "3"
 services:
   backend:
     image: officenonstop/erp:generic_v15.0
+    healthcheck:
+      test: ["CMD-SHELL", "bench --version >/dev/null 2>&1 && curl -sf localhost:8000 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     networks:
       - frappe_network
     deploy:
@@ -64,6 +69,12 @@ services:
         wait-for-it -t 120 db:3306;
         wait-for-it -t 120 redis-cache:6379;
         wait-for-it -t 120 redis-queue:6379;
+        echo "🔍 Checking that apps exist before site creation...";
+        for app in erpnext hrms insights payments india_compliance netmanthan_themes; do
+          if [ ! -d "apps/$app" ]; then
+            echo "❌ Missing app folder: $app"; exit 1;
+          fi
+        done;
         export start=`date +%s`;
         until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] && \
           [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
@@ -78,11 +89,13 @@ services:
         done;
         echo "sites/common_site_config.json found";
         bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=admin --install-app erpnext --set-default frontend;
-        bench --site frontend install-app india_compliance;
-        bench --site frontend install-app hrms;
-        bench --site frontend install-app payments;
-        bench --site frontend install-app insights;
-        bench --site frontend install-app netmanthan_themes;
+        echo "🔍 Installing extra apps...";
+        for app in hrms payments insights india_compliance netmanthan_themes; do
+          if ! bench --site frontend list-apps | grep -q "$app"; then
+            echo "⚙️ Installing $app..."; bench --site frontend install-app "$app" || exit 1;
+          fi
+        done;
+        echo "✅ Site creation and app installation complete.";
 
   db:
     image: mariadb:10.7
