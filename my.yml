@@ -13,10 +13,11 @@ services:
       redis-queue:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "bench --version >/dev/null 2>&1 && curl -sf localhost:8000 || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8000/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
+      start_period: 60s
     deploy:
       restart_policy:
         condition: on-failure
