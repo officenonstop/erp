@@ -1,15 +1,22 @@
-version: "3"
+version: "3.8"
 
 services:
   backend:
     image: officenonstop/erp:generic_v15.0
+    networks:
+      - frappe_network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "bench --version >/dev/null 2>&1 && curl -sf localhost:8000 || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
-    networks:
-      - frappe_network
     deploy:
       restart_policy:
         condition: on-failure
@@ -26,6 +33,11 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: none
@@ -34,6 +46,7 @@ services:
       - -c
     command:
       - >
+        echo "🔧 Configuring site settings...";
         ls -1 apps > sites/apps.txt;
         bench set-config -g db_host $$DB_HOST;
         bench set-config -gp db_port $$DB_PORT;
@@ -41,6 +54,7 @@ services:
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        echo "✅ Configurator done.";
     environment:
       DB_HOST: db
       DB_PORT: "3306"
@@ -55,6 +69,11 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: none
@@ -66,35 +85,49 @@ services:
       - -c
     command:
       - >
+        echo "🚀 Starting site creation...";
         wait-for-it -t 120 db:3306;
         wait-for-it -t 120 redis-cache:6379;
         wait-for-it -t 120 redis-queue:6379;
-        echo "🔍 Checking that apps exist before site creation...";
+
+        echo "🔍 Checking app folders before creating site...";
         for app in erpnext hrms insights payments india_compliance netmanthan_themes; do
           if [ ! -d "apps/$app" ]; then
             echo "❌ Missing app folder: $app"; exit 1;
           fi
         done;
-        export start=`date +%s`;
+
+        echo "✅ All app folders found.";
+
+        export start=$(date +%s);
         until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] && \
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]];
+              [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
+              [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]];
         do
-          echo "Waiting for sites/common_site_config.json to be created";
+          echo "Waiting for sites/common_site_config.json to be created...";
           sleep 5;
-          if (( `date +%s`-start > 120 )); then
-            echo "could not find sites/common_site_config.json with required keys";
-            exit 1
+          if (( $(date +%s)-start > 120 )); then
+            echo "❌ Could not find sites/common_site_config.json with required keys."; exit 1;
           fi
         done;
-        echo "sites/common_site_config.json found";
-        bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=admin --install-app erpnext --set-default frontend;
-        echo "🔍 Installing extra apps...";
+
+        echo "✅ sites/common_site_config.json found. Creating site...";
+        bench new-site --mariadb-user-host-login-scope='%' \
+                       --admin-password=admin \
+                       --db-root-username=root \
+                       --db-root-password=admin \
+                       --install-app erpnext \
+                       --set-default frontend || exit 1;
+
+        echo "🔍 Installing additional apps...";
         for app in hrms payments insights india_compliance netmanthan_themes; do
           if ! bench --site frontend list-apps | grep -q "$app"; then
             echo "⚙️ Installing $app..."; bench --site frontend install-app "$app" || exit 1;
+          else
+            echo "✔️ $app already installed, skipping.";
           fi
         done;
+
         echo "✅ Site creation and app installation complete.";
 
   db:
@@ -102,9 +135,10 @@ services:
     networks:
       - frappe_network
     healthcheck:
-      test: mysqladmin ping -h localhost --password=admin
-      interval: 1s
-      retries: 20
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     deploy:
       restart_policy:
         condition: on-failure
@@ -112,7 +146,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.7
+      - --skip-innodb-read-only-compressed
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MARIADB_ROOT_PASSWORD: admin
@@ -124,7 +158,10 @@ services:
     networks:
       - frappe_network
     depends_on:
-      - websocket
+      backend:
+        condition: service_healthy
+      websocket:
+        condition: service_started
     deploy:
       restart_policy:
         condition: on-failure
@@ -149,6 +186,9 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: on-failure
@@ -165,6 +205,9 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: on-failure
@@ -199,6 +242,9 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: on-failure
@@ -213,6 +259,9 @@ services:
     image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
+    depends_on:
+      backend:
+        condition: service_healthy
     deploy:
       restart_policy:
         condition: on-failure
