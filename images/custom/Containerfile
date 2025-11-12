@@ -107,9 +107,28 @@ RUN apt-get update \
 
 # apps.json includes
 ARG APPS_JSON_BASE64
-RUN if [ -n "${APPS_JSON_BASE64}" ]; then \
-    mkdir /opt/frappe && echo "${APPS_JSON_BASE64}" | base64 -d > /opt/frappe/apps.json; \
-  fi
+RUN set -e; \
+    echo "🔍 Checking APPS_JSON_BASE64..."; \
+    if [ -z "${APPS_JSON_BASE64}" ]; then \
+        echo "❌ ERROR: Missing APPS_JSON_BASE64 build argument."; \
+        echo "    Example fix:"; \
+        echo "    docker buildx build --build-arg APPS_JSON_BASE64=\$(base64 -w 0 apps.json) ..."; \
+        exit 1; \
+    fi; \
+    mkdir -p /opt/frappe; \
+    echo "${APPS_JSON_BASE64}" | base64 -d > /opt/frappe/apps.json 2>/dev/null || { \
+        echo "❌ ERROR: Failed to decode APPS_JSON_BASE64 — is it valid base64?"; \
+        exit 1; \
+    }; \
+    chmod 644 /opt/frappe/apps.json; \
+    echo "✅ Successfully wrote /opt/frappe/apps.json"; \
+    echo "----- Preview (first 10 lines) -----"; \
+    head -n 10 /opt/frappe/apps.json || true; \
+    echo "------------------------------------"; \
+    echo "Validating JSON syntax..."; \
+    if ! command -v jq >/dev/null 2>&1; then apt-get update && apt-get install -y jq; fi; \
+    jq . /opt/frappe/apps.json >/dev/null || { echo '❌ Invalid JSON in apps.json'; cat /opt/frappe/apps.json; exit 1; }; \
+    echo "✅ JSON valid and readable by user frappe."
 
 USER frappe
 
@@ -127,6 +146,8 @@ RUN export APP_INSTALL_ARGS="" && \
     --skip-redis-config-generation \
     --verbose \
     /home/frappe/frappe-bench && \
+  echo "🔍 Checking cloned apps..." && \
+    ls -1 /home/frappe/frappe-bench/apps || { echo "❌ No apps found in bench!"; exit 1; } \
   cd /home/frappe/frappe-bench && \
   echo "{}" > sites/common_site_config.json && \
   find apps -mindepth 1 -path "*/.git" | xargs rm -fr
