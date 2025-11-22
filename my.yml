@@ -22,7 +22,8 @@ services:
       options:
         max-size: "20m"
         max-file: "9"
-
+    volumes:
+      - docker-logs:/var/log/docker
         
   configurator:
     image: ndaptardar/erpnext_generic:v15.0
@@ -52,13 +53,14 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
-    logging:
+      - docker-logs:/var/log/docker
+     logging:
       driver: json-file
       options:
         max-size: "20m"
         max-file: "9"
 
-        
+       
   create-site:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -69,6 +71,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     entrypoint:
       - bash
       - -c
@@ -124,6 +127,7 @@ services:
       MARIADB_ROOT_PASSWORD: admin
     volumes:
       - db-data:/var/lib/mysql
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
@@ -154,6 +158,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     ports:
       - "8080:8080"
     logging:
@@ -178,6 +183,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
@@ -200,6 +206,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
@@ -216,6 +223,7 @@ services:
         condition: on-failure
     volumes:
       - redis-queue-data:/data
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
@@ -235,7 +243,8 @@ services:
       options:
         max-size: "20m"
         max-file: "9"
-
+    volumes:
+      - docker-logs:/var/log/docker
         
   scheduler:
     image: ndaptardar/erpnext_generic:v15.0
@@ -250,6 +259,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
@@ -270,6 +280,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     logging:
       driver: json-file
       options:
