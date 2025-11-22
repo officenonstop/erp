@@ -2,7 +2,7 @@ version: "3"
 
 services:
   backend:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -24,7 +24,7 @@ services:
         max-file: "9"
 
   configurator:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -59,7 +59,7 @@ services:
         max-file: "9"
 
   create-site:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -129,7 +129,7 @@ services:
         max-file: "9"
 
   frontend:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     depends_on:
@@ -161,7 +161,7 @@ services:
         max-file: "9"
 
   queue-long:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -183,7 +183,7 @@ services:
         max-file: "9"
 
   queue-short:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -236,7 +236,7 @@ services:
         max-file: "9"
 
   scheduler:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
@@ -256,7 +256,7 @@ services:
         max-file: "9"
 
   websocket:
-    image: ndaptardar/erpnext_generic:v15.0
+    image: officenonstop/erp:generic_v15.0
     networks:
       - frappe_network
     deploy:
