@@ -12,6 +12,7 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+      - docker-logs:/var/log/docker
     environment:
       DB_HOST: db
       DB_PORT: "3306"
@@ -22,8 +23,7 @@ services:
       options:
         max-size: "20m"
         max-file: "9"
-    volumes:
-      - docker-logs:/var/log/docker
+
         
   configurator:
     image: ndaptardar/erpnext_generic:v15.0
