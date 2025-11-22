@@ -276,13 +276,13 @@ services:
         max-size: "20m"
         max-file: "9"
 
-        
+
 volumes:
+  logs:
+  sites:
   db-data:
   redis-queue-data:
-  sites:
-  logs:
-
+  docker-logs:
 
 networks:
   frappe_network:
