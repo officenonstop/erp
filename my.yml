@@ -1,5 +1,6 @@
 version: "3"
 
+
 services:
   backend:
     image: ndaptardar/erpnext_generic:v15.0
@@ -16,7 +17,13 @@ services:
       DB_PORT: "3306"
       MYSQL_ROOT_PASSWORD: admin
       MARIADB_ROOT_PASSWORD: admin
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   configurator:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -45,7 +52,13 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   create-site:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -83,7 +96,13 @@ services:
         bench --site frontend install-app payments;
         bench --site frontend install-app insights;
         bench --site frontend install-app netmanthan_themes;
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+ 
   db:
     image: mariadb:10.7
     networks:
@@ -105,7 +124,13 @@ services:
       MARIADB_ROOT_PASSWORD: admin
     volumes:
       - db-data:/var/lib/mysql
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   frontend:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -131,7 +156,13 @@ services:
       - logs:/home/frappe/frappe-bench/logs
     ports:
       - "8080:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   queue-long:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -147,7 +178,13 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   queue-short:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -163,7 +200,13 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   redis-queue:
     image: redis:6.2-alpine
     networks:
@@ -173,7 +216,13 @@ services:
         condition: on-failure
     volumes:
       - redis-queue-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   redis-cache:
     image: redis:6.2-alpine
     networks:
@@ -181,7 +230,13 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   scheduler:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -195,7 +250,13 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
   websocket:
     image: ndaptardar/erpnext_generic:v15.0
     networks:
@@ -209,12 +270,19 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "9"
 
+        
 volumes:
   db-data:
   redis-queue-data:
   sites:
   logs:
+
 
 networks:
   frappe_network:
